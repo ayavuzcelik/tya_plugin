@@ -1,0 +1,72 @@
+group = "com.dev.adem.flutter_tya_plugin"
+version = "1.0-SNAPSHOT"
+
+buildscript {
+    ext.kotlin_version = "2.1.0"
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath("com.android.tools.build:gradle:8.9.1")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version")
+    }
+}
+
+allprojects {
+    repositories {
+        jcenter() // Deprecated ama Tuya için gerekebilir
+        maven { url = uri("https://maven-other.tuya.com/repository/maven-releases/") }
+        maven { url = uri("https://maven-other.tuya.com/repository/maven-commercial-releases/") }
+        maven { url = uri("https://jitpack.io") }
+        google()
+        mavenCentral()
+        maven { url = uri("https://maven.aliyun.com/repository/public") }
+        maven { url = uri("https://central.maven.org/maven2/") }
+        maven { url = uri("https://oss.sonatype.org/content/repositories/snapshots/") }
+        maven { url = uri("https://developer.huawei.com/repo/") }
+
+    }
+}
+
+apply plugin: "com.android.library"
+apply plugin: "kotlin-android"
+
+android {
+    namespace = "com.dev.adem.flutter_tya_plugin"
+    compileSdk = 36
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_11
+    }
+
+    sourceSets {
+        main.java.srcDirs += "src/main/kotlin"
+        test.java.srcDirs += "src/test/kotlin"
+    }
+
+    defaultConfig {
+        minSdk = 24
+    }
+}
+
+dependencies {
+
+    // JSON
+    implementation("com.alibaba:fastjson:1.1.67.android")
+    // Network
+    implementation("com.squareup.okhttp3:okhttp-urlconnection:4.9.3")
+    // Tuya SDK
+    implementation("com.thingclips.smart:thingsmart:6.7.3")
+    implementation("com.thingclips.smart:thingsmart-ipcsdk:6.7.0")
+    implementation("com.thingclips.smart:thingsmart-lock-sdk:6.0.1")
+    // QR Code
+    implementation("com.google.zxing:core:3.5.1")
+    // Fresco
+    implementation("com.facebook.fresco:fresco:3.1.3")
+}
