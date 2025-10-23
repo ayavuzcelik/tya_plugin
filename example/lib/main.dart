@@ -17,7 +17,6 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   String _platformVersion = 'Unknown';
-  final _flutterTyaPlugin = FlutterTyaPlugin();
 
   @override
   void initState() {
@@ -27,12 +26,17 @@ class _MyAppState extends State<MyApp> {
 
   // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initPlatformState() async {
+    await FlutterTyaPlugin.instance.initSdk(
+  appKey: 'YOUR_APP_KEY',
+  appSecret: 'YOUR_APP_SECRET',
+);
+var homes = await FlutterTyaPlugin.instance.queryHomeList();
     String platformVersion;
     // Platform messages may fail, so we use a try/catch PlatformException.
     // We also handle the message potentially returning null.
     try {
       platformVersion =
-          await _flutterTyaPlugin.getPlatformVersion() ?? 'Unknown platform version';
+          await FlutterTyaPlugin.instance.getPlatformVersion() ?? 'Unknown platform version';
     } on PlatformException {
       platformVersion = 'Failed to get platform version.';
     }

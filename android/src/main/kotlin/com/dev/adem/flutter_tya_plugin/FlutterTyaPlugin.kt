@@ -10,10 +10,17 @@ import com.thingclips.smart.android.user.api.IRegisterCallback
 import com.thingclips.smart.android.user.bean.User
 import com.thingclips.smart.home.sdk.ThingHomeSdk
 import com.thingclips.smart.home.sdk.bean.HomeBean
+import com.thingclips.smart.home.sdk.builder.ThingCameraActivatorBuilder
 import com.thingclips.smart.home.sdk.callback.IThingGetHomeListCallback
 import com.thingclips.smart.home.sdk.callback.IThingHomeResultCallback
 import com.thingclips.smart.sdk.api.IResultCallback
+import com.thingclips.smart.sdk.api.IThingActivatorGetToken
+import com.thingclips.smart.sdk.api.IThingSmartCameraActivatorListener
+import com.thingclips.smart.sdk.bean.DeviceBean
 import io.flutter.embedding.engine.plugins.FlutterPlugin
+import io.flutter.plugin.common.EventChannel
+import io.flutter.plugin.common.EventChannel.EventSink
+import io.flutter.plugin.common.EventChannel.StreamHandler
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
@@ -22,7 +29,8 @@ import io.flutter.plugin.common.MethodChannel.Result
 /** FlutterTyaPlugin */
 class FlutterTyaPlugin :
     FlutterPlugin,
-    MethodCallHandler {
+    MethodCallHandler,
+    StreamHandler {
     // The MethodChannel that will the communication between Flutter and native Android
     //
     // This local reference serves to register the plugin with the Flutter Engine and unregister it
@@ -32,6 +40,8 @@ class FlutterTyaPlugin :
     private var logLevel: LogLevel = LogLevel.DEBUG
     private var context: Context? = null
     private var methodChannel: MethodChannel? = null
+    /*private var eventChannel: EventChannel? = null
+    private var eventSink: EventSink? = null*/
     private var pluginBinding: FlutterPlugin.FlutterPluginBinding? = null
 
 
@@ -40,8 +50,14 @@ class FlutterTyaPlugin :
         pluginBinding = flutterPluginBinding
 
         context = flutterPluginBinding.applicationContext
-        methodChannel = MethodChannel(flutterPluginBinding.binaryMessenger, NAMESPACE)
+        methodChannel = MethodChannel(flutterPluginBinding.binaryMessenger, "$NAMESPACE/methods")
         methodChannel?.setMethodCallHandler(this)
+       /* eventChannel = EventChannel(
+            flutterPluginBinding.binaryMessenger,
+            "$NAMESPACE/events"
+        )
+        eventChannel?.setStreamHandler(this)*/
+
     }
 
     override fun onMethodCall(
@@ -80,93 +96,33 @@ class FlutterTyaPlugin :
 
             }
 
-            "sendBindVerifyCodeWithEmail" -> {
+            "loginOrRegisterWithUid" -> {
                 val countryCode = call.argument<String>("countryCode")
-                val email = call.argument<String>("email")
-                try {
-                    ThingHomeSdk.getUserInstance().sendBindVerifyCodeWithEmail(
-                        countryCode!!, email!!,
-                        object : IResultCallback {
-                            override fun onSuccess() {
-                                log(
-                                    LogLevel.INFO,
-                                    "sendBindVerifyCodeWithEmail success for email=$email code=$countryCode"
-                                )
-                                result.success(true)
-                            }
-
-                            override fun onError(errorCode: String?, errorMsg: String?) {
-                                log(
-                                    LogLevel.ERROR,
-                                    "sendBindVerifyCodeWithEmail failed: [$errorCode] $errorMsg"
-                                )
-                                result.success(false)
-                            }
-                        }
-                    )
-
-                } catch (e: Exception) {
-                    log(LogLevel.ERROR, "sendBindVerifyCodeWithEmail failed: ${e.message}")
-                    result.error("SEND_BIND_VERIFY_FAILED", e.message, null)
-                }
-            }
-
-            "registerAccountWithEmail" -> {
-                val countryCode = call.argument<String>("countryCode")
-                val email = call.argument<String>("email")
                 val password = call.argument<String>("password")
-                val code = call.argument<String>("code")
+                val uid = call.argument<String>("uid")
+
                 try {
-                    ThingHomeSdk.getUserInstance().registerAccountWithEmail(
-                        countryCode, email, password, code,
-                        object : IRegisterCallback {
-                            override fun onSuccess(user: User?) {
-                                log(
-                                    LogLevel.INFO,
-                                    "registerAccountWithEmail success for email=$email"
-                                )
-                                result.success(true)
-                            }
-
-                            override fun onError(code: String?, error: String?) {
-                                log(
-                                    LogLevel.ERROR,
-                                    "registerAccountWithEmail failed: [$code] $error"
-                                )
-                                result.success(false)
-                            }
-                        }
-                    )
-
-                } catch (e: Exception) {
-                    log(LogLevel.ERROR, "registerAccountWithEmail failed: ${e.message}")
-                    result.error("REGISTER_FAILED", e.message, null)
-                }
-            }
-
-            "loginWithEmail" -> {
-                val countryCode = call.argument<String>("countryCode")
-                val email = call.argument<String>("email")
-                val password = call.argument<String>("password")
-                try {
-                    ThingHomeSdk.getUserInstance().loginWithEmail(
-                        countryCode, email, password,
+                    ThingHomeSdk.getUserInstance().loginOrRegisterWithUid(
+                        countryCode,
+                        uid,
+                        password,
                         object : ILoginCallback {
                             override fun onSuccess(user: User?) {
-                                log(LogLevel.INFO, "loginWithEmail success for email=$email")
-                                result.success(true)
+                                log(
+                                    LogLevel.INFO,
+                                    "loginOrRegisterWithUid success: user=${user?.uid}"
+                                )
                             }
 
                             override fun onError(code: String?, error: String?) {
-                                log(LogLevel.ERROR, "loginWithEmail failed: [$code] $error")
-                                result.success(false)
+                                log(LogLevel.ERROR, "loginOrRegisterWithUid failed: [$code] $error")
                             }
                         }
                     )
 
                 } catch (e: Exception) {
-                    log(LogLevel.ERROR, "loginWithEmail failed: ${e.message}")
-                    result.error("LOGIN_FAILED", e.message, null)
+                    log(LogLevel.ERROR, "loginOrRegisterWithUid failed: ${e.message}")
+                    result.error("LOGIN_OR_REGISTER_FAILED", e.message, null)
                 }
             }
 
@@ -333,70 +289,84 @@ class FlutterTyaPlugin :
                 val homeId = call.argument<Int>("homeId")
                 try {
                     val home = ThingHomeSdk.newHomeInstance(homeId!!.toLong())
-log(LogLevel.INFO, "getHomeDetail: Fetching details for homeId=$homeId")
+                    log(LogLevel.INFO, "getHomeDetail: Fetching details for homeId=$homeId")
 
-home.getHomeDetail(object : IThingHomeResultCallback {
-    override fun onSuccess(bean: HomeBean?) {
-        if (bean == null) {
-            log(LogLevel.WARNING, "getHomeDetail: HomeBean is null for homeId=$homeId")
-            result.success(emptyList<Map<String, Any?>>())
-            return
-        }
+                    home.getHomeDetail(object : IThingHomeResultCallback {
+                        override fun onSuccess(bean: HomeBean?) {
+                            if (bean == null) {
+                                log(
+                                    LogLevel.WARNING,
+                                    "getHomeDetail: HomeBean is null for homeId=$homeId"
+                                )
+                                result.success(emptyList<Map<String, Any?>>())
+                                return
+                            }
 
-        log(LogLevel.INFO, "getHomeDetail: Home '${bean.name}' (${bean.homeId}) fetched successfully")
-        val devices = arrayListOf<Map<String, Any?>>()
+                            log(
+                                LogLevel.INFO,
+                                "getHomeDetail: Home '${bean.name}' (${bean.homeId}) fetched successfully"
+                            )
+                            val devices = arrayListOf<Map<String, Any?>>()
 
-        bean.deviceList?.forEach { it ->
-            val deviceModel = it.deviceBean
+                            bean.deviceList?.forEach { it ->
 
-            val device = hashMapOf<String, Any?>(
-                "uiName" to it.uiName,
-                "devId" to it.devId,
-                "name" to it.getName(),
-                "iconUrl" to it.getIconUrl(),
-                "isOnline" to it.isOnline,
-                "isCloudOnline" to it.isCloudOnline,
-                "isLocalOnline" to it.isLocalOnline,
-                "isShare" to it.getIsShare(),
-                "dps" to it.getDps(),
-                "dpCodes" to it.getDpCodes(),
-                "productId" to it.getProductId(),
-                "supportGroup" to it.isSupportGroup,
-                "gwType" to it.getGwType(),
-                "pv" to it.getPv(),
-                "latitude" to it.getLat(),
-                "longitude" to it.getLon(),
-                "localKey" to it.getLocalKey(),
-                "uuid" to it.getUuid(),
-                "timezoneId" to deviceModel.timezoneId,
-                "nodeId" to deviceModel.nodeId,
-                "parentId" to deviceModel.parentId,
-                "devKey" to deviceModel.devKey,
-                "homeDisplayOrder" to deviceModel.homeDisplayOrder,
-                "sharedTime" to deviceModel.sharedTime,
-                "accessType" to deviceModel.accessType,
-                "schema" to deviceModel.getSchema(),
-                "category" to deviceModel.productBean.category,
-                "categoryCode" to deviceModel.categoryCode,
-                "cadv" to deviceModel.cadv,
-                "dpName" to deviceModel.dpName,
-                "productVer" to deviceModel.getProductVer(),
-                "uiId" to deviceModel.getUi()
-            )
+                                val device = hashMapOf<String, Any?>(
+                                    "uiName" to it.uiName,
+                                    "devId" to it.devId,
+                                    "name" to it.getName(),
+                                    "iconUrl" to it.getIconUrl(),
+                                    "isOnline" to it.isOnline,
+                                    "isCloudOnline" to it.isCloudOnline,
+                                    "isLocalOnline" to it.isLocalOnline,
+                                    "isShare" to it.getIsShare(),
+                                    "dps" to it.getDps(),
+                                    "dpCodes" to it.getDpCodes(),
+                                    "productId" to it.getProductId(),
+                                    "supportGroup" to it.isSupportGroup,
+                                    "gwType" to it.getGwType(),
+                                    "pv" to it.getPv(),
+                                    "latitude" to it.getLat(),
+                                    "longitude" to it.getLon(),
+                                    "localKey" to it.getLocalKey(),
+                                    "uuid" to it.getUuid(),
+                                    "timezoneId" to it.timezoneId,
+                                    "nodeId" to it.nodeId,
+                                    "parentId" to it.parentId,
+                                    "devKey" to it.devKey,
+                                    "homeDisplayOrder" to it.homeDisplayOrder,
+                                    "sharedTime" to it.sharedTime,
+                                    "accessType" to it.accessType,
+                                    "schema" to it.getSchema(),
+                                    "category" to it.productBean.category,
+                                    "categoryCode" to it.categoryCode,
+                                    "cadv" to it.cadv,
+                                    "dpName" to it.dpName,
+                                    "productVer" to it.getProductVer(),
+                                    "uiId" to it.getUi()
+                                )
 
-            devices.add(device)
-            log(LogLevel.INFO, "getHomeDetail: Device loaded: ${it.getName()} (${it.devId})")
-        }
+                                devices.add(device)
+                                log(
+                                    LogLevel.INFO,
+                                    "getHomeDetail: Device loaded: ${it.getName()} (${it.devId})"
+                                )
+                            }
 
-        log(LogLevel.INFO, "getHomeDetail: Total ${devices.size} devices found for homeId=$homeId")
-        result.success(devices)
-    }
+                            log(
+                                LogLevel.INFO,
+                                "getHomeDetail: Total ${devices.size} devices found for homeId=$homeId"
+                            )
+                            result.success(devices)
+                        }
 
-    override fun onError(errorCode: String?, errorMsg: String?) {
-        log(LogLevel.ERROR, "getHomeDetail: Failed to fetch home detail [$errorCode] $errorMsg")
-        result.error(errorCode ?: "UNKNOWN", errorMsg, null)
-    }
-})
+                        override fun onError(errorCode: String?, errorMsg: String?) {
+                            log(
+                                LogLevel.ERROR,
+                                "getHomeDetail: Failed to fetch home detail [$errorCode] $errorMsg"
+                            )
+                            result.error(errorCode ?: "UNKNOWN", errorMsg, null)
+                        }
+                    })
 
                 } catch (e: Exception) {
                     log(LogLevel.ERROR, "getDeviceList failed: ${e.message}")
@@ -405,17 +375,84 @@ home.getHomeDetail(object : IThingHomeResultCallback {
             }
 
             "getActivatorToken" -> {
+                val homeId = call.argument<Int>("homeId")
                 try {
-                    // TODO: implement
+
+                    ThingHomeSdk.getActivatorInstance()
+                        .getActivatorToken(homeId!!.toLong(), object : IThingActivatorGetToken {
+                            override fun onSuccess(token: String?) {
+                                log(
+                                    LogLevel.INFO,
+                                    "getActivatorToken success: token=$token for homeId=$homeId"
+                                )
+                                result.success(token)
+                            }
+
+                            override fun onFailure(code: String?, error: String?) {
+                                log(
+                                    LogLevel.ERROR,
+                                    "getActivatorToken failed: [$code] $error for homeId=$homeId"
+                                )
+                                result.error(code ?: "UNKNOWN_ERROR", error, null)
+                            }
+                        })
+
                 } catch (e: Exception) {
                     log(LogLevel.ERROR, "getActivatorToken failed: ${e.message}")
                     result.error("GET_ACTIVATOR_TOKEN_FAILED", e.message, null)
                 }
             }
 
-            "startCameraActivator" -> {
+            /*"startCameraActivator" -> {
+                val ssid = call.argument<String>("ssid")
+                val password = call.argument<String>("password")
+                val token = call.argument<String>("token")
                 try {
-                    // TODO: implement
+                    val builder = ThingCameraActivatorBuilder()
+                        .setContext(context)
+                        .setSsid(ssid)
+                        .setPassword(password)
+                        .setToken(token)
+                        .setTimeOut(100)
+                        .setListener(object : IThingSmartCameraActivatorListener {
+
+                            override fun onQRCodeSuccess(qrcodeUrl: String) {
+                                log(LogLevel.INFO, "CameraActivator: QR code generated: $qrcodeUrl")
+                                cameraActivatorEventSink?.success(
+                                    mapOf("type" to "onQRCodeSuccess", "data" to qrcodeUrl)
+                                )
+                            }
+
+                            override fun onError(errorCode: String, errorMsg: String) {
+                                log(
+                                    LogLevel.ERROR,
+                                    "CameraActivator: Error occurred: [$errorCode] $errorMsg"
+                                )
+                                cameraActivatorEventSink?.error(errorCode, errorMsg, null)
+                            }
+
+                            override fun onActiveSuccess(devResp: DeviceBean?) {
+                                log(
+                                    LogLevel.INFO,
+                                    "CameraActivator: Device activated successfully: devId=${devResp?.devId}"
+                                )
+                                cameraActivatorEventSink?.success(
+                                    mapOf(
+                                        "type" to "onActiveSuccess",
+                                        "data" to devResp?.devId,
+                                    )
+                                )
+                            }
+                        })
+
+                    val activator =
+                        ThingHomeSdk.getActivatorInstance().newCameraDevActivator(builder)
+
+                    log(LogLevel.INFO, "CameraActivator: QR activator created, starting...")
+                    activator.createQRCode()
+                    activator.start()
+                    log(LogLevel.INFO, "CameraActivator: Activator started")
+                    result.success(true)
                 } catch (e: Exception) {
                     log(LogLevel.ERROR, "startCameraActivator failed: ${e.message}")
                     result.error("START_CAMERA_ACTIVATOR_FAILED", e.message, null)
@@ -474,7 +511,7 @@ home.getHomeDetail(object : IThingHomeResultCallback {
                     log(LogLevel.ERROR, "moveDirection failed: ${e.message}")
                     result.error("MOVE_DIRECTION_FAILED", e.message, null)
                 }
-            }
+            }*/
 
 
             else -> {
@@ -494,6 +531,8 @@ home.getHomeDetail(object : IThingHomeResultCallback {
 
         methodChannel?.setMethodCallHandler(null)
         methodChannel = null
+        /*eventChannel?.setStreamHandler(null)
+        eventChannel = null*/
     }
 
     private fun invokeMethodUIThread(method: String, data: HashMap<String, Any>) {
@@ -522,6 +561,17 @@ home.getHomeDetail(object : IThingHomeResultCallback {
             LogLevel.ERROR -> Log.e(TAG, "[FBP] $logMessage")
             else -> Log.d(TAG, "[FBP] $logMessage")
         }
+    }
+
+    override fun onListen(
+        arguments: Any?,
+        events: EventSink?
+    ) {
+      //  this.eventSink = events
+    }
+
+    override fun onCancel(arguments: Any?) {
+      //  this.eventSink = null
     }
 
     enum class LogLevel {
