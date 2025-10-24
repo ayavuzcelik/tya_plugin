@@ -4,8 +4,9 @@ version = "1.0-SNAPSHOT"
 buildscript {
     ext.kotlin_version = "2.1.0"
     repositories {
-        google()
         mavenCentral()
+        google()
+        jcenter()
     }
     dependencies {
         classpath("com.android.tools.build:gradle:8.9.1")
@@ -13,19 +14,14 @@ buildscript {
     }
 }
 
-allprojects {
+rootProject.allprojects {
     repositories {
-        jcenter() // Deprecated ama Tuya için gerekebilir
-        maven { url = uri("https://maven-other.tuya.com/repository/maven-releases/") }
-        maven { url = uri("https://maven-other.tuya.com/repository/maven-commercial-releases/") }
-        maven { url = uri("https://jitpack.io") }
-        google()
         mavenCentral()
-        maven { url = uri("https://maven.aliyun.com/repository/public") }
-        maven { url = uri("https://central.maven.org/maven2/") }
-        maven { url = uri("https://oss.sonatype.org/content/repositories/snapshots/") }
-        maven { url = uri("https://developer.huawei.com/repo/") }
-
+        google()
+        jcenter()
+        flatDir {
+            dirs 'libs'
+        }
     }
 }
 
@@ -56,7 +52,7 @@ android {
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['security-algorithm-1.0.0-beta.aar'])
+    implementation fileTree(dir: 'libs', include: ['*.aar'])
     // JSON
     implementation("com.alibaba:fastjson:1.1.67.android")
     // Network
