@@ -56,7 +56,7 @@ android {
 }
 
 dependencies {
-
+    implementation fileTree(dir: 'libs', include: ['security-algorithm-1.0.0-beta.aar'])
     // JSON
     implementation("com.alibaba:fastjson:1.1.67.android")
     // Network
