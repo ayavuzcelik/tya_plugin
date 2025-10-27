@@ -1,3 +1,5 @@
+import com.android.build.api.dsl.Packaging
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -36,6 +38,14 @@ android {
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")
         }
+    }
+    packaging {
+        jniLibs {
+            pickFirsts.add("*/libc++_shared.so")
+        }
+    }
+    dependencies {
+        implementation(files("libs/security-algorithm-1.0.0-beta.aar"))
     }
 }
 
