@@ -4,8 +4,8 @@ version = "1.0-SNAPSHOT"
 buildscript {
     ext.kotlin_version = "2.1.0"
     repositories {
-        mavenCentral()
         google()
+        mavenCentral()
     }
     dependencies {
         classpath("com.android.tools.build:gradle:8.9.1")
@@ -15,8 +15,9 @@ buildscript {
 
 rootProject.allprojects {
     repositories {
-        mavenCentral()
+        jcenter()
         google()
+        mavenCentral()
         maven { url 'https://maven-other.tuya.com/repository/maven-releases/' }
         maven { url "https://maven-other.tuya.com/repository/maven-commercial-releases/" }
         maven { url 'https://jitpack.io' }
@@ -24,10 +25,7 @@ rootProject.allprojects {
         maven { url 'https://central.maven.org/maven2/' }
         maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
         maven { url 'https://developer.huawei.com/repo/' }
-        flatDir {
-            dirs 'libs'
         }
-    }
 }
 
 apply plugin: "com.android.library"
@@ -54,19 +52,24 @@ android {
     defaultConfig {
         minSdk = 24
     }
-}
 
-dependencies {
-    fileTree(include: ['*.aar'], dir: 'libs')    // JSON
-    implementation("com.alibaba:fastjson:1.1.67.android")
-    // Network
-    implementation("com.squareup.okhttp3:okhttp-urlconnection:4.9.3")
-    // Tuya SDK
-    implementation("com.thingclips.smart:thingsmart:6.7.3")
-    implementation("com.thingclips.smart:thingsmart-ipcsdk:6.7.0")
-    implementation("com.thingclips.smart:thingsmart-lock-sdk:6.0.1")
-    // QR Code
-    implementation("com.google.zxing:core:3.5.1")
-    // Fresco
-    implementation("com.facebook.fresco:fresco:3.1.3")
+    configurations.all {
+        exclude group: "com.thingclips.smart" ,module: 'thingsmart-modularCampAnno'
+    }
+
+    dependencies {
+        fileTree(include: ['*.aar'], dir: 'libs')    // JSON
+        implementation("com.alibaba:fastjson:1.1.67.android")
+        // Network
+        implementation("com.squareup.okhttp3:okhttp-urlconnection:4.9.3")
+        // Tuya SDK
+        implementation("com.thingclips.smart:thingsmart:6.7.3")
+        implementation("com.thingclips.smart:thingsmart-ipcsdk:6.7.0")
+        implementation("com.thingclips.smart:thingsmart-lock-sdk:6.0.1")
+        // QR Code
+        implementation("com.google.zxing:core:3.5.1")
+        // Fresco
+        implementation("com.facebook.fresco:fresco:3.1.3")
+    }
+
 }
