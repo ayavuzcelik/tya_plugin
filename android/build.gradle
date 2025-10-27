@@ -15,7 +15,6 @@ buildscript {
 
 rootProject.allprojects {
     repositories {
-        jcenter()
         google()
         mavenCentral()
         maven { url 'https://maven-other.tuya.com/repository/maven-releases/' }
@@ -58,7 +57,6 @@ android {
     }
 
     dependencies {
-        fileTree(include: ['*.aar'], dir: 'libs')    // JSON
         implementation("com.alibaba:fastjson:1.1.67.android")
         // Network
         implementation("com.squareup.okhttp3:okhttp-urlconnection:4.9.3")
