@@ -3,18 +3,22 @@ import 'package:flutter/services.dart';
 import 'flutter_tya_plugin_platform_interface.dart';
 
 class MethodChannelFlutterTyaPlugin extends FlutterTyaPluginPlatform {
-  
   @visibleForTesting
-  final MethodChannel _methodChannel = const MethodChannel('flutter_tya_plugin/methods');
+  final MethodChannel _methodChannel = const MethodChannel(
+    'flutter_tya_plugin/methods',
+  );
 
   /// Platform version example
   @override
   Future<String?> getPlatformVersion() async {
-    final version = await _methodChannel.invokeMethod<String>('getPlatformVersion');
+    final version = await _methodChannel.invokeMethod<String>(
+      'getPlatformVersion',
+    );
     return version;
   }
 
   /// SDK init
+  @override
   Future<bool> initSdk({
     required String appKey,
     required String appSecret,
@@ -28,7 +32,53 @@ class MethodChannelFlutterTyaPlugin extends FlutterTyaPluginPlatform {
     return result ?? false;
   }
 
+  @override
+  Future<bool> sendBindVerifyCodeWithEmail(
+    String countryCode,
+    String email,
+  ) async {
+    final result = await _methodChannel.invokeMethod<bool>(
+      "sendBindVerifyCodeWithEmail",
+      {'countryCode': countryCode, 'email': email},
+    );
+    return result ?? false;
+  }
+
+  @override
+  Future<bool> registerAccountWithEmail(
+    String countryCode,
+    String email,
+    String password,
+    String code,
+  ) async {
+    final result = await _methodChannel.invokeMethod<bool>(
+      "registerAccountWithEmail",
+      {
+        'countryCode': countryCode,
+        'email': email,
+        'password': password,
+        'code': code,
+      },
+    );
+    return result == true;
+  }
+
+  @override
+  Future<bool> loginWithEmail(
+    String countryCode,
+    String email,
+    String password,
+  ) async {
+    final result = await _methodChannel.invokeMethod<bool>("loginWithEmail", {
+      'countryCode': countryCode,
+      'email': email,
+      'password': password,
+    });
+    return result == true;
+  }
+
   /// Login or register with UID
+  @override
   Future<void> loginOrRegisterWithUid({
     required String countryCode,
     required String uid,
@@ -42,6 +92,7 @@ class MethodChannelFlutterTyaPlugin extends FlutterTyaPluginPlatform {
   }
 
   /// Query home list
+  @override
   Future<List<Map<String, dynamic>>> queryHomeList() async {
     final result = await _methodChannel.invokeMethod('queryHomeList');
     if (result is List) {
@@ -51,6 +102,7 @@ class MethodChannelFlutterTyaPlugin extends FlutterTyaPluginPlatform {
   }
 
   /// Create new home
+  @override
   Future<int?> createHome({
     required String name,
     required double latitude,
@@ -69,6 +121,7 @@ class MethodChannelFlutterTyaPlugin extends FlutterTyaPluginPlatform {
   }
 
   /// Delete all homes
+  @override
   Future<bool> deleteAllHomes() async {
     final result = await _methodChannel.invokeMethod<bool>('deleteAllHomes');
     return result ?? false;
@@ -86,6 +139,7 @@ class MethodChannelFlutterTyaPlugin extends FlutterTyaPluginPlatform {
   }
 
   /// Set log level (DEBUG, INFO, WARNING, ERROR)
+  @override
   Future<void> setLogLevel(int levelIndex) async {
     await _methodChannel.invokeMethod('setLogLevel', levelIndex);
   }

@@ -1,7 +1,6 @@
 import 'flutter_tya_plugin_platform_interface.dart';
 
 class FlutterTyaPlugin {
-  
   // 1. STATİK VE SABİT BİR 'INSTANCE' (ÖRNEK) OLUŞTUR
   // Bu, tüm uygulama boyunca kullanılacak tek örnektir.
   static final FlutterTyaPlugin instance = FlutterTyaPlugin._internal();
@@ -28,6 +27,39 @@ class FlutterTyaPlugin {
       appSecret: appSecret,
       isDebug: isDebug,
     );
+  }
+
+  Future<bool> sendBindVerifyCodeWithEmail(
+    String countryCode,
+    String email,
+  ) async {
+    final result = await FlutterTyaPluginPlatform.instance
+        .sendBindVerifyCodeWithEmail(countryCode, email);
+    return result;
+  }
+
+  Future<bool> registerAccountWithEmail(
+    String countryCode,
+    String email,
+    String password,
+    String code,
+  ) async {
+    final result = await FlutterTyaPluginPlatform.instance
+        .registerAccountWithEmail(countryCode, email, password, code);
+    return result == true;
+  }
+
+  Future<bool> loginWithEmail(
+    String countryCode,
+    String email,
+    String password,
+  ) async {
+    final result = await FlutterTyaPluginPlatform.instance.loginWithEmail(
+      countryCode,
+      email,
+      password,
+    );
+    return result == true;
   }
 
   /// Login or register user with UID

@@ -40,6 +40,7 @@ class FlutterTyaPlugin :
     private var logLevel: LogLevel = LogLevel.DEBUG
     private var context: Context? = null
     private var methodChannel: MethodChannel? = null
+
     /*private var eventChannel: EventChannel? = null
     private var eventSink: EventSink? = null*/
     private var pluginBinding: FlutterPlugin.FlutterPluginBinding? = null
@@ -52,11 +53,11 @@ class FlutterTyaPlugin :
         context = flutterPluginBinding.applicationContext
         methodChannel = MethodChannel(flutterPluginBinding.binaryMessenger, "$NAMESPACE/methods")
         methodChannel?.setMethodCallHandler(this)
-       /* eventChannel = EventChannel(
-            flutterPluginBinding.binaryMessenger,
-            "$NAMESPACE/events"
-        )
-        eventChannel?.setStreamHandler(this)*/
+        /* eventChannel = EventChannel(
+             flutterPluginBinding.binaryMessenger,
+             "$NAMESPACE/events"
+         )
+         eventChannel?.setStreamHandler(this)*/
 
     }
 
@@ -124,6 +125,53 @@ class FlutterTyaPlugin :
                     log(LogLevel.ERROR, "loginOrRegisterWithUid failed: ${e.message}")
                     result.error("LOGIN_OR_REGISTER_FAILED", e.message, null)
                 }
+            }
+
+            "sendBindVerifyCodeWithEmail" -> {
+                val countryCode = call.argument<String>("countryCode")
+                val email = call.argument<String>("email")
+                ThingHomeSdk.getUserInstance().sendBindVerifyCodeWithEmail(
+                    countryCode!!, email!!,
+                    object : IResultCallback {
+                        override fun onSuccess() = result.success(true)
+                        override fun onError(errorCode: String?, errorMsg: String?) {
+                            Log.e(TAG, "Send Code Error: $errorCode $errorMsg")
+                            result.success(false)
+                        }
+                    })
+            }
+
+            "registerAccountWithEmail" -> {
+                val countryCode = call.argument<String>("countryCode") ?: ""
+                val email = call.argument<String>("email") ?: ""
+                val password = call.argument<String>("password") ?: ""
+                val code = call.argument<String>("code") ?: ""
+                ThingHomeSdk.getUserInstance().registerAccountWithEmail(
+                    countryCode, email, password, code,
+                    object : IRegisterCallback {
+                        override fun onSuccess(user: User?) = result.success(true)
+                        override fun onError(code: String?, error: String?) {
+                            Log.e(TAG, "Register Error: $code $error")
+                            result.success(false)
+                        }
+                    }
+                )
+            }
+
+            "loginWithEmail" -> {
+                val countryCode = call.argument<String>("countryCode") ?: ""
+                val email = call.argument<String>("email") ?: ""
+                val password = call.argument<String>("password") ?: ""
+                ThingHomeSdk.getUserInstance().loginWithEmail(
+                    countryCode, email, password,
+                    object : ILoginCallback {
+                        override fun onSuccess(user: User?) = result.success(true)
+                        override fun onError(code: String?, error: String?) {
+                            Log.e(TAG, "Login Error: $code $error")
+                            result.success(false)
+                        }
+                    }
+                )
             }
 
             "queryHomeList" -> {
@@ -567,11 +615,11 @@ class FlutterTyaPlugin :
         arguments: Any?,
         events: EventSink?
     ) {
-      //  this.eventSink = events
+        //  this.eventSink = events
     }
 
     override fun onCancel(arguments: Any?) {
-      //  this.eventSink = null
+        //  this.eventSink = null
     }
 
     enum class LogLevel {
