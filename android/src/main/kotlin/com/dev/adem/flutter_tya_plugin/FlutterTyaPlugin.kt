@@ -601,13 +601,13 @@ class FlutterTyaPlugin :
         if (level.ordinal > logLevel.ordinal) {
             return
         }
-        val logMessage = "[FBP] ${message ?: "null"}"
+        val logMessage = "[FTP] ${message ?: "null"}"
 
         when (level) {
-            LogLevel.DEBUG -> Log.d(TAG, "[FBP] $logMessage")
-            LogLevel.WARNING -> Log.w(TAG, "[FBP] $logMessage")
-            LogLevel.ERROR -> Log.e(TAG, "[FBP] $logMessage")
-            else -> Log.d(TAG, "[FBP] $logMessage")
+            LogLevel.DEBUG -> Log.d(TAG, "[FTP] $logMessage")
+            LogLevel.WARNING -> Log.w(TAG, "[FTP] $logMessage")
+            LogLevel.ERROR -> Log.e(TAG, "[FTP] $logMessage")
+            else -> Log.d(TAG, "[FTP] $logMessage")
         }
     }
 
