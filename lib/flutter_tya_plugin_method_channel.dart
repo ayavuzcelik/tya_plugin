@@ -128,6 +128,7 @@ class MethodChannelFlutterTyaPlugin extends FlutterTyaPluginPlatform {
   }
 
   /// Get device list for a home
+  @override
   Future<List<Map<String, dynamic>>> getDeviceList(int homeId) async {
     final result = await _methodChannel.invokeMethod('getDeviceList', {
       'homeId': homeId,
@@ -136,6 +137,15 @@ class MethodChannelFlutterTyaPlugin extends FlutterTyaPluginPlatform {
       return result.map((e) => Map<String, dynamic>.from(e)).toList();
     }
     return [];
+  }
+
+  /// Platform version example
+  @override
+  Future<String?> getActivatorToken() async {
+    final token = await _methodChannel.invokeMethod<String>(
+      'getActivatorToken',
+    );
+    return token;
   }
 
   /// Set log level (DEBUG, INFO, WARNING, ERROR)

@@ -107,6 +107,11 @@ class FlutterTyaPlugin {
     return FlutterTyaPluginPlatform.instance.getDeviceList(homeId);
   }
 
+  /// Get Activator Token
+  Future<String?> getActivatorToken() {
+    return FlutterTyaPluginPlatform.instance.getActivatorToken();
+  }
+
   /// Set log level for debugging
   Future<void> setLogLevel(int levelIndex) {
     return FlutterTyaPluginPlatform.instance.setLogLevel(levelIndex);
