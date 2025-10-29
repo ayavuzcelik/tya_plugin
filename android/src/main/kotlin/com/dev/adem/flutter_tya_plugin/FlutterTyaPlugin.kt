@@ -15,6 +15,7 @@ import com.thingclips.smart.home.sdk.callback.IThingGetHomeListCallback
 import com.thingclips.smart.home.sdk.callback.IThingHomeResultCallback
 import com.thingclips.smart.sdk.api.IResultCallback
 import com.thingclips.smart.sdk.api.IThingActivatorGetToken
+import com.thingclips.smart.sdk.api.IThingDevice
 import com.thingclips.smart.sdk.api.IThingSmartCameraActivatorListener
 import com.thingclips.smart.sdk.bean.DeviceBean
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -40,9 +41,9 @@ class FlutterTyaPlugin :
     private var logLevel: LogLevel = LogLevel.DEBUG
     private var context: Context? = null
     private var methodChannel: MethodChannel? = null
+    private var eventChannel: EventChannel? = null
+    private var eventSink: EventSink? = null
 
-    /*private var eventChannel: EventChannel? = null
-    private var eventSink: EventSink? = null*/
     private var pluginBinding: FlutterPlugin.FlutterPluginBinding? = null
 
 
@@ -52,13 +53,12 @@ class FlutterTyaPlugin :
 
         context = flutterPluginBinding.applicationContext
         methodChannel = MethodChannel(flutterPluginBinding.binaryMessenger, "$NAMESPACE/methods")
+        eventChannel = EventChannel(
+            flutterPluginBinding.binaryMessenger,
+            "$NAMESPACE/events"
+        )
+        eventChannel?.setStreamHandler(this)
         methodChannel?.setMethodCallHandler(this)
-        /* eventChannel = EventChannel(
-             flutterPluginBinding.binaryMessenger,
-             "$NAMESPACE/events"
-         )
-         eventChannel?.setStreamHandler(this)*/
-
     }
 
     override fun onMethodCall(
@@ -451,7 +451,7 @@ class FlutterTyaPlugin :
                 }
             }
 
-            /*"startCameraActivator" -> {
+            "qrActivator" -> {
                 val ssid = call.argument<String>("ssid")
                 val password = call.argument<String>("password")
                 val token = call.argument<String>("token")
@@ -465,8 +465,8 @@ class FlutterTyaPlugin :
                         .setListener(object : IThingSmartCameraActivatorListener {
 
                             override fun onQRCodeSuccess(qrcodeUrl: String) {
-                                log(LogLevel.INFO, "CameraActivator: QR code generated: $qrcodeUrl")
-                                cameraActivatorEventSink?.success(
+                                log(LogLevel.INFO, "QR code generated: $qrcodeUrl")
+                                eventSink?.success(
                                     mapOf("type" to "onQRCodeSuccess", "data" to qrcodeUrl)
                                 )
                             }
@@ -474,17 +474,17 @@ class FlutterTyaPlugin :
                             override fun onError(errorCode: String, errorMsg: String) {
                                 log(
                                     LogLevel.ERROR,
-                                    "CameraActivator: Error occurred: [$errorCode] $errorMsg"
+                                    "Error occurred: [$errorCode] $errorMsg"
                                 )
-                                cameraActivatorEventSink?.error(errorCode, errorMsg, null)
+                                eventSink?.error(errorCode, errorMsg, null)
                             }
 
                             override fun onActiveSuccess(devResp: DeviceBean?) {
                                 log(
                                     LogLevel.INFO,
-                                    "CameraActivator: Device activated successfully: devId=${devResp?.devId}"
+                                    "Device activated successfully: devId=${devResp?.devId}"
                                 )
-                                cameraActivatorEventSink?.success(
+                                eventSink?.success(
                                     mapOf(
                                         "type" to "onActiveSuccess",
                                         "data" to devResp?.devId,
@@ -496,14 +496,14 @@ class FlutterTyaPlugin :
                     val activator =
                         ThingHomeSdk.getActivatorInstance().newCameraDevActivator(builder)
 
-                    log(LogLevel.INFO, "CameraActivator: QR activator created, starting...")
+                    log(LogLevel.INFO, "QR activator created, starting...")
                     activator.createQRCode()
                     activator.start()
-                    log(LogLevel.INFO, "CameraActivator: Activator started")
+                    log(LogLevel.INFO, "Activator started")
                     result.success(true)
                 } catch (e: Exception) {
-                    log(LogLevel.ERROR, "startCameraActivator failed: ${e.message}")
-                    result.error("START_CAMERA_ACTIVATOR_FAILED", e.message, null)
+                    log(LogLevel.ERROR, "qrActivator failed: ${e.message}")
+                    result.error("QR_ACTIVATOR_FAILED", e.message, null)
                 }
             }
 
@@ -559,7 +559,7 @@ class FlutterTyaPlugin :
                     log(LogLevel.ERROR, "moveDirection failed: ${e.message}")
                     result.error("MOVE_DIRECTION_FAILED", e.message, null)
                 }
-            }*/
+            }
 
 
             else -> {
@@ -579,8 +579,8 @@ class FlutterTyaPlugin :
 
         methodChannel?.setMethodCallHandler(null)
         methodChannel = null
-        /*eventChannel?.setStreamHandler(null)
-        eventChannel = null*/
+        eventChannel?.setStreamHandler(null)
+        eventChannel = null
     }
 
     private fun invokeMethodUIThread(method: String, data: HashMap<String, Any>) {
@@ -615,11 +615,11 @@ class FlutterTyaPlugin :
         arguments: Any?,
         events: EventSink?
     ) {
-        //  this.eventSink = events
+        this.eventSink = events
     }
 
     override fun onCancel(arguments: Any?) {
-        //  this.eventSink = null
+        this.eventSink = null
     }
 
     enum class LogLevel {
