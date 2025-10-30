@@ -114,10 +114,21 @@ class FlutterTyaPlugin :
                                     LogLevel.INFO,
                                     "loginOrRegisterWithUid success: user=${user?.uid}"
                                 )
+                                if (user == null) {
+                                    result.error("LOGIN_OR_REGISTER_FAILED", "User null", null)
+                                }
+                                val item = mapOf<String, Any>(
+                                    "uId" to user!!.uid,
+                                    "uSId" to user.sid,
+                                    "uType" to user.userType
+                                )
+
+                                result.success(item)
                             }
 
                             override fun onError(code: String?, error: String?) {
                                 log(LogLevel.ERROR, "loginOrRegisterWithUid failed: [$code] $error")
+                                result.error("LOGIN_OR_REGISTER_FAILED", error, null)
                             }
                         }
                     )
@@ -126,53 +137,6 @@ class FlutterTyaPlugin :
                     log(LogLevel.ERROR, "loginOrRegisterWithUid failed: ${e.message}")
                     result.error("LOGIN_OR_REGISTER_FAILED", e.message, null)
                 }
-            }
-
-            "sendBindVerifyCodeWithEmail" -> {
-                val countryCode = call.argument<String>("countryCode")
-                val email = call.argument<String>("email")
-                ThingHomeSdk.getUserInstance().sendBindVerifyCodeWithEmail(
-                    countryCode!!, email!!,
-                    object : IResultCallback {
-                        override fun onSuccess() = result.success(true)
-                        override fun onError(errorCode: String?, errorMsg: String?) {
-                            Log.e(TAG, "Send Code Error: $errorCode $errorMsg")
-                            result.success(false)
-                        }
-                    })
-            }
-
-            "registerAccountWithEmail" -> {
-                val countryCode = call.argument<String>("countryCode") ?: ""
-                val email = call.argument<String>("email") ?: ""
-                val password = call.argument<String>("password") ?: ""
-                val code = call.argument<String>("code") ?: ""
-                ThingHomeSdk.getUserInstance().registerAccountWithEmail(
-                    countryCode, email, password, code,
-                    object : IRegisterCallback {
-                        override fun onSuccess(user: User?) = result.success(true)
-                        override fun onError(code: String?, error: String?) {
-                            Log.e(TAG, "Register Error: $code $error")
-                            result.success(false)
-                        }
-                    }
-                )
-            }
-
-            "loginWithEmail" -> {
-                val countryCode = call.argument<String>("countryCode") ?: ""
-                val email = call.argument<String>("email") ?: ""
-                val password = call.argument<String>("password") ?: ""
-                ThingHomeSdk.getUserInstance().loginWithEmail(
-                    countryCode, email, password,
-                    object : ILoginCallback {
-                        override fun onSuccess(user: User?) = result.success(true)
-                        override fun onError(code: String?, error: String?) {
-                            Log.e(TAG, "Login Error: $code $error")
-                            result.success(false)
-                        }
-                    }
-                )
             }
 
             "queryHomeList" -> {
@@ -185,15 +149,6 @@ class FlutterTyaPlugin :
                                 homeBeans?.forEach {
                                     val item = mapOf<String, Any>(
                                         "homeId" to it.homeId,
-                                        "name" to it.name,
-                                        "geoName" to it.geoName,
-                                        "latitude" to it.lat,
-                                        "longitude" to it.lon,
-                                        "backgroundUrl" to it.background,
-                                        "role" to it.role,
-                                        "dealStatus" to it.homeStatus,
-                                        "managementStatus" to it.managmentStatus(),
-                                        "nickName" to it.inviteName
                                     )
                                     homes.add(item)
                                 }
@@ -261,79 +216,6 @@ class FlutterTyaPlugin :
                 }
             }
 
-            "deleteAllHomes" -> {
-                try {
-                    val homeManager = ThingHomeSdk.getHomeManagerInstance()
-                    homeManager.queryHomeList(object : IThingGetHomeListCallback {
-                        override fun onSuccess(homeBeans: MutableList<HomeBean>?) {
-                            if (homeBeans.isNullOrEmpty()) {
-                                log(LogLevel.INFO, "deleteAllHomes: no homes to delete")
-                                result.success(true)
-                                return
-                            }
-
-                            log(
-                                LogLevel.INFO,
-                                "deleteAllHomes: ${homeBeans.size} homes found, deleting..."
-                            )
-
-                            var deletedCount = 0
-                            val totalCount = homeBeans.size
-
-                            homeBeans.forEach { home ->
-                                ThingHomeSdk.newHomeInstance(home.homeId)
-                                    .dismissHome(object : IResultCallback {
-                                        override fun onSuccess() {
-                                            log(
-                                                LogLevel.INFO,
-                                                "deleteAllHomes: homeId=${home.homeId} deleted successfully"
-                                            )
-                                            deletedCount++
-                                            if (deletedCount == totalCount) {
-                                                log(
-                                                    LogLevel.INFO,
-                                                    "deleteAllHomes: all homes processed, success"
-                                                )
-                                                result.success(true)
-                                            }
-                                        }
-
-                                        override fun onError(
-                                            errorCode: String?,
-                                            errorMsg: String?
-                                        ) {
-                                            log(
-                                                LogLevel.ERROR,
-                                                "deleteAllHomes: failed to delete homeId=${home.homeId}, [$errorCode] $errorMsg"
-                                            )
-                                            deletedCount++
-                                            if (deletedCount == totalCount) {
-                                                log(
-                                                    LogLevel.WARNING,
-                                                    "deleteAllHomes: all homes processed, some deletions failed"
-                                                )
-                                                result.success(false)
-                                            }
-                                        }
-                                    })
-                            }
-                        }
-
-                        override fun onError(errorCode: String?, errorMsg: String?) {
-                            log(
-                                LogLevel.ERROR,
-                                "deleteAllHomes: queryHomeList failed: [$errorCode] $errorMsg"
-                            )
-                            result.success(false)
-                        }
-                    })
-
-                } catch (e: Exception) {
-                    log(LogLevel.ERROR, "deleteAllHomes failed: ${e.message}")
-                    result.error("DELETE_ALL_HOMES_FAILED", e.message, null)
-                }
-            }
-
             "getDeviceList" -> {
                 val homeId = call.argument<Int>("homeId")
                 try {
@@ -358,40 +240,11 @@ class FlutterTyaPlugin :
                             val devices = arrayListOf<Map<String, Any?>>()
 
                             bean.deviceList?.forEach { it ->
-
                                 val device = hashMapOf<String, Any?>(
-                                    "uiName" to it.uiName,
                                     "devId" to it.devId,
-                                    "name" to it.getName(),
-                                    "iconUrl" to it.getIconUrl(),
-                                    "isOnline" to it.isOnline,
-                                    "isCloudOnline" to it.isCloudOnline,
-                                    "isLocalOnline" to it.isLocalOnline,
-                                    "isShare" to it.getIsShare(),
-                                    "dps" to it.getDps(),
-                                    "dpCodes" to it.getDpCodes(),
-                                    "productId" to it.getProductId(),
-                                    "supportGroup" to it.isSupportGroup,
-                                    "gwType" to it.getGwType(),
-                                    "pv" to it.getPv(),
-                                    "latitude" to it.getLat(),
-                                    "longitude" to it.getLon(),
-                                    "localKey" to it.getLocalKey(),
-                                    "uuid" to it.getUuid(),
-                                    "timezoneId" to it.timezoneId,
-                                    "nodeId" to it.nodeId,
-                                    "parentId" to it.parentId,
-                                    "devKey" to it.devKey,
-                                    "homeDisplayOrder" to it.homeDisplayOrder,
-                                    "sharedTime" to it.sharedTime,
-                                    "accessType" to it.accessType,
-                                    "schema" to it.getSchema(),
+                                    "mac" to it.mac,
                                     "category" to it.productBean.category,
-                                    "categoryCode" to it.categoryCode,
-                                    "cadv" to it.cadv,
-                                    "dpName" to it.dpName,
-                                    "productVer" to it.getProductVer(),
-                                    "uiId" to it.getUi()
+                                    "isOnline" to it.isOnline,
                                 )
 
                                 devices.add(device)

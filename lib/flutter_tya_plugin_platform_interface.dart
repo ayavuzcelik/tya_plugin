@@ -32,34 +32,6 @@ abstract class FlutterTyaPluginPlatform extends PlatformInterface {
     throw UnimplementedError('initSdk() has not been implemented.');
   }
 
-  Future<bool> sendBindVerifyCodeWithEmail(
-    String countryCode,
-    String email,
-  ) async {
-    throw UnimplementedError(
-      'sendBindVerifyCodeWithEmail() has not been implemented.',
-    );
-  }
-
-  Future<bool> registerAccountWithEmail(
-    String countryCode,
-    String email,
-    String password,
-    String code,
-  ) async {
-    throw UnimplementedError(
-      'registerAccountWithEmail() has not been implemented.',
-    );
-  }
-
-  Future<bool> loginWithEmail(
-    String countryCode,
-    String email,
-    String password,
-  ) async {
-    throw UnimplementedError('loginWithEmail() has not been implemented.');
-  }
-
   /// Login or register with UID
   Future<void> loginOrRegisterWithUid({
     required String countryCode,

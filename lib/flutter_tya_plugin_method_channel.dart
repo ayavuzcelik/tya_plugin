@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'flutter_tya_plugin_platform_interface.dart';
 
 class MethodChannelFlutterTyaPlugin extends FlutterTyaPluginPlatform {
-  @visibleForTesting
   final MethodChannel _methodChannel = const MethodChannel(
     'flutter_tya_plugin/methods',
   );
@@ -33,51 +32,6 @@ class MethodChannelFlutterTyaPlugin extends FlutterTyaPluginPlatform {
       'isDebug': isDebug,
     });
     return result ?? false;
-  }
-
-  @override
-  Future<bool> sendBindVerifyCodeWithEmail(
-    String countryCode,
-    String email,
-  ) async {
-    final result = await _methodChannel.invokeMethod<bool>(
-      "sendBindVerifyCodeWithEmail",
-      {'countryCode': countryCode, 'email': email},
-    );
-    return result ?? false;
-  }
-
-  @override
-  Future<bool> registerAccountWithEmail(
-    String countryCode,
-    String email,
-    String password,
-    String code,
-  ) async {
-    final result = await _methodChannel.invokeMethod<bool>(
-      "registerAccountWithEmail",
-      {
-        'countryCode': countryCode,
-        'email': email,
-        'password': password,
-        'code': code,
-      },
-    );
-    return result == true;
-  }
-
-  @override
-  Future<bool> loginWithEmail(
-    String countryCode,
-    String email,
-    String password,
-  ) async {
-    final result = await _methodChannel.invokeMethod<bool>("loginWithEmail", {
-      'countryCode': countryCode,
-      'email': email,
-      'password': password,
-    });
-    return result == true;
   }
 
   /// Login or register with UID
