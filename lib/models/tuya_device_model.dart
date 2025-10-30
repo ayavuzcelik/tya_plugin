@@ -1,4 +1,4 @@
-class ThingSmartDeviceModel {
+class TuyaDeviceModel {
   final String devId;
 
   final String macId;
@@ -7,7 +7,7 @@ class ThingSmartDeviceModel {
 
   final String category;
 
-  ThingSmartDeviceModel.fromJson(Map<String, dynamic> json)
+  TuyaDeviceModel.fromJson(Map<String, dynamic> json)
     : devId = json['devId'],
       macId = json['mac'],
       isOnline = json['isOnline'],

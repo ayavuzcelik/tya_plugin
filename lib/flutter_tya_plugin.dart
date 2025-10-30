@@ -1,3 +1,7 @@
+import 'package:flutter_tya_plugin/models/tuya_device_model.dart';
+import 'package:flutter_tya_plugin/models/tuya_home_model.dart';
+import 'package:flutter_tya_plugin/models/tuya_user_model.dart';
+
 import 'flutter_tya_plugin_platform_interface.dart';
 
 class FlutterTyaPlugin {
@@ -23,7 +27,7 @@ class FlutterTyaPlugin {
   }
 
   /// Login or register user with UID
-  Future<void> loginOrRegisterWithUid({
+  Future<TuyaUserModel> loginOrRegisterWithUid({
     required String countryCode,
     required String uid,
     required String password,
@@ -38,13 +42,13 @@ class FlutterTyaPlugin {
   }
 
   /// Query all homes
-  Future<List<Map<String, dynamic>>> queryHomeList() async {
+  Future<List<TuyaHomeModel>> queryHomeList() async {
     final result = await FlutterTyaPluginPlatform.instance.queryHomeList();
     return result;
   }
 
   /// Create new home
-  Future<int?> createHome({
+  Future<TuyaHomeModel> createHome({
     required String name,
     required double latitude,
     required double longitude,
@@ -68,7 +72,7 @@ class FlutterTyaPlugin {
   }
 
   /// Get device list for a home
-  Future<List<Map<String, dynamic>>> getDeviceList(int homeId) async {
+  Future<List<TuyaDeviceModel>> getDeviceList(int homeId) async {
     final result = await FlutterTyaPluginPlatform.instance.getDeviceList(
       homeId,
     );

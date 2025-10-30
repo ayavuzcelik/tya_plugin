@@ -1,5 +1,7 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_tya_plugin/models/tuya_device_model.dart';
+import 'package:flutter_tya_plugin/models/tuya_home_model.dart';
+import 'package:flutter_tya_plugin/models/tuya_user_model.dart';
 import 'flutter_tya_plugin_platform_interface.dart';
 
 class MethodChannelFlutterTyaPlugin extends FlutterTyaPluginPlatform {
@@ -36,31 +38,33 @@ class MethodChannelFlutterTyaPlugin extends FlutterTyaPluginPlatform {
 
   /// Login or register with UID
   @override
-  Future<void> loginOrRegisterWithUid({
+  Future<TuyaUserModel> loginOrRegisterWithUid({
     required String countryCode,
     required String uid,
     required String password,
   }) async {
-    await _methodChannel.invokeMethod('loginOrRegisterWithUid', {
+    final user = await _methodChannel.invokeMethod('loginOrRegisterWithUid', {
       'countryCode': countryCode,
       'uid': uid,
       'password': password,
     });
+
+    return TuyaUserModel.fromJson(user);
   }
 
   /// Query home list
   @override
-  Future<List<Map<String, dynamic>>> queryHomeList() async {
+  Future<List<TuyaHomeModel>> queryHomeList() async {
     final result = await _methodChannel.invokeMethod('queryHomeList');
     if (result is List) {
-      return result.map((e) => Map<String, dynamic>.from(e)).toList();
+      return result.map((e) => TuyaHomeModel.fromJson(e)).toList();
     }
     return [];
   }
 
   /// Create new home
   @override
-  Future<int?> createHome({
+  Future<TuyaHomeModel> createHome({
     required String name,
     required double latitude,
     required double longitude,
@@ -74,24 +78,17 @@ class MethodChannelFlutterTyaPlugin extends FlutterTyaPluginPlatform {
       'geoName': geoName,
       'rooms': rooms ?? [],
     });
-    return result is int ? result : null;
-  }
-
-  /// Delete all homes
-  @override
-  Future<bool> deleteAllHomes() async {
-    final result = await _methodChannel.invokeMethod<bool>('deleteAllHomes');
-    return result ?? false;
+    return result;
   }
 
   /// Get device list for a home
   @override
-  Future<List<Map<String, dynamic>>> getDeviceList(int homeId) async {
+  Future<List<TuyaDeviceModel>> getDeviceList(int homeId) async {
     final result = await _methodChannel.invokeMethod('getDeviceList', {
       'homeId': homeId,
     });
     if (result is List) {
-      return result.map((e) => Map<String, dynamic>.from(e)).toList();
+      return result.map((e) => TuyaDeviceModel.fromJson(e)).toList();
     }
     return [];
   }

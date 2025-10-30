@@ -1,4 +1,4 @@
-class ThingSmartUserModel {
+class TuyaUserModel {
   /// User Id
   int uId;
 
@@ -8,14 +8,10 @@ class ThingSmartUserModel {
   /// User Type
   int uType;
 
-  ThingSmartUserModel({
-    required this.uId,
-    required this.uSId,
-    required this.uType,
-  });
+  TuyaUserModel({required this.uId, required this.uSId, required this.uType});
 
-  factory ThingSmartUserModel.fromJson(Map<String, dynamic> json) {
-    return ThingSmartUserModel(
+  factory TuyaUserModel.fromJson(Map<String, dynamic> json) {
+    return TuyaUserModel(
       uId: json['uId'],
       uSId: json['uSId'],
       uType: json['uType'],

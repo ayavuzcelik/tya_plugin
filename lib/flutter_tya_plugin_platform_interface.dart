@@ -1,3 +1,6 @@
+import 'package:flutter_tya_plugin/models/tuya_device_model.dart';
+import 'package:flutter_tya_plugin/models/tuya_home_model.dart';
+import 'package:flutter_tya_plugin/models/tuya_user_model.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 import 'flutter_tya_plugin_method_channel.dart';
 
@@ -33,7 +36,7 @@ abstract class FlutterTyaPluginPlatform extends PlatformInterface {
   }
 
   /// Login or register with UID
-  Future<void> loginOrRegisterWithUid({
+  Future<TuyaUserModel> loginOrRegisterWithUid({
     required String countryCode,
     required String uid,
     required String password,
@@ -44,12 +47,12 @@ abstract class FlutterTyaPluginPlatform extends PlatformInterface {
   }
 
   /// Query home list
-  Future<List<Map<String, dynamic>>> queryHomeList() {
+  Future<List<TuyaHomeModel>> queryHomeList() {
     throw UnimplementedError('queryHomeList() has not been implemented.');
   }
 
   /// Create a new home
-  Future<int?> createHome({
+  Future<TuyaHomeModel> createHome({
     required String name,
     required double latitude,
     required double longitude,
@@ -65,7 +68,7 @@ abstract class FlutterTyaPluginPlatform extends PlatformInterface {
   }
 
   /// Get device list for a home
-  Future<List<Map<String, dynamic>>> getDeviceList(int homeId) {
+  Future<List<TuyaDeviceModel>> getDeviceList(int homeId) {
     throw UnimplementedError('getDeviceList() has not been implemented.');
   }
 
