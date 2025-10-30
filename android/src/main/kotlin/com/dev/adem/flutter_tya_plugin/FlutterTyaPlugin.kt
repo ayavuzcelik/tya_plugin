@@ -87,6 +87,7 @@ class FlutterTyaPlugin :
                 val isDebug = call.argument<Boolean>("isDebug") ?: false
                 log(LogLevel.INFO, "Debug mode set to $isDebug")
                 try {
+                    ThingHomeSdk.setDebugMode(isDebug)
                     ThingHomeSdk.init(context as Application, appKey!!, appSecret!!)
                     log(LogLevel.INFO, "ThingHomeSdk initialized with appKey=$appKey")
                     result.success(true)
