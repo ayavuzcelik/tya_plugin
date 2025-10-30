@@ -62,11 +62,6 @@ abstract class FlutterTyaPluginPlatform extends PlatformInterface {
     throw UnimplementedError('createHome() has not been implemented.');
   }
 
-  /// Delete all homes
-  Future<bool> deleteAllHomes() {
-    throw UnimplementedError('deleteAllHomes() has not been implemented.');
-  }
-
   /// Get device list for a home
   Future<List<TuyaDeviceModel>> getDeviceList(int homeId) {
     throw UnimplementedError('getDeviceList() has not been implemented.');

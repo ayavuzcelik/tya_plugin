@@ -65,12 +65,6 @@ class FlutterTyaPlugin {
     return result;
   }
 
-  /// Delete all homes
-  Future<bool> deleteAllHomes() async {
-    final result = await FlutterTyaPluginPlatform.instance.deleteAllHomes();
-    return result;
-  }
-
   /// Get device list for a home
   Future<List<TuyaDeviceModel>> getDeviceList(int homeId) async {
     final result = await FlutterTyaPluginPlatform.instance.getDeviceList(
