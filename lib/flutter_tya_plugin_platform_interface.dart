@@ -101,7 +101,7 @@ abstract class FlutterTyaPluginPlatform extends PlatformInterface {
     throw UnimplementedError('subscribeToEvents() has not been implemented.');
   }
 
-  Future<String?> getActivatorToken() {
+  Future<String?> getActivatorToken(int homeId) {
     throw UnimplementedError('getActivatorToken() has not been implemented.');
   }
 

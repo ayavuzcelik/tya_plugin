@@ -121,8 +121,10 @@ class FlutterTyaPlugin {
   }
 
   /// Get Activator Token
-  Future<String?> getActivatorToken() async {
-    final result = await FlutterTyaPluginPlatform.instance.getActivatorToken();
+  Future<String?> getActivatorToken(int homeId) async {
+    final result = await FlutterTyaPluginPlatform.instance.getActivatorToken(
+      homeId,
+    );
     return result;
   }
 
