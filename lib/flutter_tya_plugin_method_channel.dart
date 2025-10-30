@@ -151,7 +151,7 @@ class MethodChannelFlutterTyaPlugin extends FlutterTyaPluginPlatform {
   Future<String?> getActivatorToken(int homeId) async {
     final token = await _methodChannel.invokeMethod<String>(
       'getActivatorToken',
-      homeId,
+      {'homeId': homeId},
     );
     return token;
   }
