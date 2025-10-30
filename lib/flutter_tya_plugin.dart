@@ -67,17 +67,20 @@ class FlutterTyaPlugin {
     required String countryCode,
     required String uid,
     required String password,
-  }) {
-    return FlutterTyaPluginPlatform.instance.loginOrRegisterWithUid(
-      countryCode: countryCode,
-      uid: uid,
-      password: password,
-    );
+  }) async {
+    final result = await FlutterTyaPluginPlatform.instance
+        .loginOrRegisterWithUid(
+          countryCode: countryCode,
+          uid: uid,
+          password: password,
+        );
+    return result;
   }
 
   /// Query all homes
-  Future<List<Map<String, dynamic>>> queryHomeList() {
-    return FlutterTyaPluginPlatform.instance.queryHomeList();
+  Future<List<Map<String, dynamic>>> queryHomeList() async {
+    final result = await FlutterTyaPluginPlatform.instance.queryHomeList();
+    return result;
   }
 
   /// Create new home
@@ -87,29 +90,53 @@ class FlutterTyaPlugin {
     required double longitude,
     required String geoName,
     List<String>? rooms,
-  }) {
-    return FlutterTyaPluginPlatform.instance.createHome(
+  }) async {
+    final result = await FlutterTyaPluginPlatform.instance.createHome(
       name: name,
       latitude: latitude,
       longitude: longitude,
       geoName: geoName,
       rooms: rooms,
     );
+    return result;
   }
 
   /// Delete all homes
-  Future<bool> deleteAllHomes() {
-    return FlutterTyaPluginPlatform.instance.deleteAllHomes();
+  Future<bool> deleteAllHomes() async {
+    final result = await FlutterTyaPluginPlatform.instance.deleteAllHomes();
+    return result;
   }
 
   /// Get device list for a home
-  Future<List<Map<String, dynamic>>> getDeviceList(int homeId) {
-    return FlutterTyaPluginPlatform.instance.getDeviceList(homeId);
+  Future<List<Map<String, dynamic>>> getDeviceList(int homeId) async {
+    final result = await FlutterTyaPluginPlatform.instance.getDeviceList(
+      homeId,
+    );
+    return result;
+  }
+
+  /// Subscribe all events
+  Stream<dynamic> subscribeToEvents() {
+    return FlutterTyaPluginPlatform.instance.subscribeToEvents();
   }
 
   /// Get Activator Token
-  Future<String?> getActivatorToken() {
-    return FlutterTyaPluginPlatform.instance.getActivatorToken();
+  Future<String?> getActivatorToken() async {
+    final result = await FlutterTyaPluginPlatform.instance.getActivatorToken();
+    return result;
+  }
+
+  Future<bool> qrActivator({
+    required String ssid,
+    required String password,
+    required String token,
+  }) async {
+    final started = await FlutterTyaPluginPlatform.instance.qrActivator(
+      ssid: ssid,
+      password: password,
+      token: token,
+    );
+    return started;
   }
 
   /// Set log level for debugging

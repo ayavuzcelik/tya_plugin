@@ -7,6 +7,9 @@ class MethodChannelFlutterTyaPlugin extends FlutterTyaPluginPlatform {
   final MethodChannel _methodChannel = const MethodChannel(
     'flutter_tya_plugin/methods',
   );
+  final EventChannel _eventChannel = const EventChannel(
+    'flutter_tya_plugin/events',
+  );
 
   /// Platform version example
   @override
@@ -139,13 +142,31 @@ class MethodChannelFlutterTyaPlugin extends FlutterTyaPluginPlatform {
     return [];
   }
 
-  /// Platform version example
+  @override
+  Stream<dynamic> subscribeToEvents() {
+    return _eventChannel.receiveBroadcastStream();
+  }
+
   @override
   Future<String?> getActivatorToken() async {
     final token = await _methodChannel.invokeMethod<String>(
       'getActivatorToken',
     );
     return token;
+  }
+
+  @override
+  Future<bool> qrActivator({
+    required String ssid,
+    required String password,
+    required String token,
+  }) async {
+    final started = await _methodChannel.invokeMethod<bool>('qrActivator', {
+      'ssid': ssid,
+      'password': password,
+      'token': token,
+    });
+    return started ?? false;
   }
 
   /// Set log level (DEBUG, INFO, WARNING, ERROR)

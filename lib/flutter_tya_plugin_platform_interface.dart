@@ -97,8 +97,20 @@ abstract class FlutterTyaPluginPlatform extends PlatformInterface {
     throw UnimplementedError('getDeviceList() has not been implemented.');
   }
 
+  Stream<dynamic> subscribeToEvents() {
+    throw UnimplementedError('subscribeToEvents() has not been implemented.');
+  }
+
   Future<String?> getActivatorToken() {
     throw UnimplementedError('getActivatorToken() has not been implemented.');
+  }
+
+  Future<bool> qrActivator({
+    required String ssid,
+    required String password,
+    required String token,
+  }) {
+    throw UnimplementedError('qrActivator() has not been implemented.');
   }
 
   /// Set log level (DEBUG, INFO, etc.)
