@@ -38,7 +38,7 @@ class MethodChannelFlutterTyaPlugin extends FlutterTyaPluginPlatform {
 
   /// Login or register with UID
   @override
-  Future<TuyaUserModel> loginOrRegisterWithUid({
+  Future<TuyaUserModel?> loginOrRegisterWithUid({
     required String countryCode,
     required String uid,
     required String password,
@@ -54,7 +54,7 @@ class MethodChannelFlutterTyaPlugin extends FlutterTyaPluginPlatform {
 
   /// Query home list
   @override
-  Future<List<TuyaHomeModel>> queryHomeList() async {
+  Future<List<TuyaHomeModel>?> queryHomeList() async {
     final result = await _methodChannel.invokeMethod('queryHomeList');
     if (result is List) {
       return result.map((e) => TuyaHomeModel.fromJson(e)).toList();
@@ -64,21 +64,25 @@ class MethodChannelFlutterTyaPlugin extends FlutterTyaPluginPlatform {
 
   /// Create new home
   @override
-  Future<TuyaHomeModel> createHome({
+  Future<TuyaHomeModel?> createHome({
     required String name,
     required double latitude,
     required double longitude,
     required String geoName,
     List<String>? rooms,
   }) async {
-    final result = await _methodChannel.invokeMethod('createHome', {
-      'name': name,
-      'latitude': latitude,
-      'longitude': longitude,
-      'geoName': geoName,
-      'rooms': rooms ?? [],
-    });
-    return result;
+    try {
+      final result = await _methodChannel.invokeMethod('createHome', {
+        'name': name,
+        'latitude': latitude,
+        'longitude': longitude,
+        'geoName': geoName,
+        'rooms': rooms ?? [],
+      });
+      return result;
+    } catch (e) {
+      return null;
+    }
   }
 
   /// Get device list for a home

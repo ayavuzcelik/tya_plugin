@@ -27,50 +27,66 @@ class FlutterTyaPlugin {
   }
 
   /// Login or register user with UID
-  Future<TuyaUserModel> loginOrRegisterWithUid({
+  Future<TuyaUserModel?> loginOrRegisterWithUid({
     required String countryCode,
     required String uid,
     required String password,
   }) async {
-    final result = await FlutterTyaPluginPlatform.instance
-        .loginOrRegisterWithUid(
-          countryCode: countryCode,
-          uid: uid,
-          password: password,
-        );
-    return result;
+    try {
+      final result = await FlutterTyaPluginPlatform.instance
+          .loginOrRegisterWithUid(
+            countryCode: countryCode,
+            uid: uid,
+            password: password,
+          );
+      return result;
+    } catch (e) {
+      return null;
+    }
   }
 
   /// Query all homes
-  Future<List<TuyaHomeModel>> queryHomeList() async {
-    final result = await FlutterTyaPluginPlatform.instance.queryHomeList();
-    return result;
+  Future<List<TuyaHomeModel>?> queryHomeList() async {
+    try {
+      final result = await FlutterTyaPluginPlatform.instance.queryHomeList();
+      return result;
+    } catch (e) {
+      return null;
+    }
   }
 
   /// Create new home
-  Future<TuyaHomeModel> createHome({
+  Future<TuyaHomeModel?> createHome({
     required String name,
     required double latitude,
     required double longitude,
     required String geoName,
     List<String>? rooms,
   }) async {
-    final result = await FlutterTyaPluginPlatform.instance.createHome(
-      name: name,
-      latitude: latitude,
-      longitude: longitude,
-      geoName: geoName,
-      rooms: rooms,
-    );
-    return result;
+    try {
+      final result = await FlutterTyaPluginPlatform.instance.createHome(
+        name: name,
+        latitude: latitude,
+        longitude: longitude,
+        geoName: geoName,
+        rooms: rooms,
+      );
+      return result;
+    } catch (e) {
+      return null;
+    }
   }
 
   /// Get device list for a home
-  Future<List<TuyaDeviceModel>> getDeviceList(int homeId) async {
-    final result = await FlutterTyaPluginPlatform.instance.getDeviceList(
-      homeId,
-    );
-    return result;
+  Future<List<TuyaDeviceModel>?> getDeviceList(int homeId) async {
+    try {
+      final result = await FlutterTyaPluginPlatform.instance.getDeviceList(
+        homeId,
+      );
+      return result;
+    } catch (e) {
+      return null;
+    }
   }
 
   /// Subscribe all events
