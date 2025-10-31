@@ -32,27 +32,19 @@ class FlutterTyaPlugin {
     required String uid,
     required String password,
   }) async {
-    try {
-      final result = await FlutterTyaPluginPlatform.instance
-          .loginOrRegisterWithUid(
-            countryCode: countryCode,
-            uid: uid,
-            password: password,
-          );
-      return result;
-    } catch (e) {
-      return null;
-    }
+    final result = await FlutterTyaPluginPlatform.instance
+        .loginOrRegisterWithUid(
+          countryCode: countryCode,
+          uid: uid,
+          password: password,
+        );
+    return result;
   }
 
   /// Query all homes
   Future<List<TuyaHomeModel>?> queryHomeList() async {
-    try {
-      final result = await FlutterTyaPluginPlatform.instance.queryHomeList();
-      return result;
-    } catch (e) {
-      return null;
-    }
+    final result = await FlutterTyaPluginPlatform.instance.queryHomeList();
+    return result;
   }
 
   /// Create new home
@@ -63,30 +55,22 @@ class FlutterTyaPlugin {
     required String geoName,
     List<String>? rooms,
   }) async {
-    try {
-      final result = await FlutterTyaPluginPlatform.instance.createHome(
-        name: name,
-        latitude: latitude,
-        longitude: longitude,
-        geoName: geoName,
-        rooms: rooms,
-      );
-      return result;
-    } catch (e) {
-      return null;
-    }
+    final result = await FlutterTyaPluginPlatform.instance.createHome(
+      name: name,
+      latitude: latitude,
+      longitude: longitude,
+      geoName: geoName,
+      rooms: rooms,
+    );
+    return result;
   }
 
   /// Get device list for a home
   Future<List<TuyaDeviceModel>?> getDeviceList(int homeId) async {
-    try {
-      final result = await FlutterTyaPluginPlatform.instance.getDeviceList(
-        homeId,
-      );
-      return result;
-    } catch (e) {
-      return null;
-    }
+    final result = await FlutterTyaPluginPlatform.instance.getDeviceList(
+      homeId,
+    );
+    return result;
   }
 
   /// Subscribe all events

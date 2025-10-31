@@ -112,7 +112,7 @@ class FlutterTyaPlugin :
                             override fun onSuccess(user: User?) {
                                 log(
                                     LogLevel.INFO,
-                                    "loginOrRegisterWithUid success: user=${user?.uid}"
+                                    "Logging User=${user?.uid}"
                                 )
                                 if (user == null) {
                                     result.error("LOGIN_OR_REGISTER_FAILED", "User null", null)
@@ -122,7 +122,7 @@ class FlutterTyaPlugin :
                                     "uSId" to user.sid,
                                     "uType" to user.userType
                                 )
-
+                                log(LogLevel.INFO, "Returning user map: $item")
                                 result.success(item)
                             }
 

@@ -43,23 +43,32 @@ class MethodChannelFlutterTyaPlugin extends FlutterTyaPluginPlatform {
     required String uid,
     required String password,
   }) async {
-    final user = await _methodChannel.invokeMethod('loginOrRegisterWithUid', {
-      'countryCode': countryCode,
-      'uid': uid,
-      'password': password,
-    });
+    try {
+      final user = await _methodChannel.invokeMethod('loginOrRegisterWithUid', {
+        'countryCode': countryCode,
+        'uid': uid,
+        'password': password,
+      });
 
-    return TuyaUserModel.fromJson(user);
+      return TuyaUserModel.fromJson(user);
+    } catch (e) {
+      return null;
+    }
   }
 
   /// Query home list
   @override
   Future<List<TuyaHomeModel>?> queryHomeList() async {
-    final result = await _methodChannel.invokeMethod('queryHomeList');
-    if (result is List) {
-      return result.map((e) => TuyaHomeModel.fromJson(e)).toList();
+    try {
+      final result = await _methodChannel.invokeMethod('queryHomeList');
+      if (result is List) {
+        return result.map((e) => TuyaHomeModel.fromJson(e)).toList();
+      } else {
+        return [];
+      }
+    } catch (e) {
+      return null;
     }
-    return [];
   }
 
   /// Create new home
@@ -87,14 +96,18 @@ class MethodChannelFlutterTyaPlugin extends FlutterTyaPluginPlatform {
 
   /// Get device list for a home
   @override
-  Future<List<TuyaDeviceModel>> getDeviceList(int homeId) async {
-    final result = await _methodChannel.invokeMethod('getDeviceList', {
-      'homeId': homeId,
-    });
-    if (result is List) {
-      return result.map((e) => TuyaDeviceModel.fromJson(e)).toList();
+  Future<List<TuyaDeviceModel>?> getDeviceList(int homeId) async {
+    try {
+      final result = await _methodChannel.invokeMethod('getDeviceList', {
+        'homeId': homeId,
+      });
+      if (result is List) {
+        return result.map((e) => TuyaDeviceModel.fromJson(e)).toList();
+      }
+      return [];
+    } catch (e) {
+      return null;
     }
-    return [];
   }
 
   @override
@@ -104,11 +117,15 @@ class MethodChannelFlutterTyaPlugin extends FlutterTyaPluginPlatform {
 
   @override
   Future<String?> getActivatorToken(int homeId) async {
-    final token = await _methodChannel.invokeMethod<String>(
-      'getActivatorToken',
-      {'homeId': homeId},
-    );
-    return token;
+    try {
+      final token = await _methodChannel.invokeMethod<String>(
+        'getActivatorToken',
+        {'homeId': homeId},
+      );
+      return token;
+    } catch (e) {
+      return null;
+    }
   }
 
   @override
@@ -117,12 +134,16 @@ class MethodChannelFlutterTyaPlugin extends FlutterTyaPluginPlatform {
     required String password,
     required String token,
   }) async {
-    final started = await _methodChannel.invokeMethod<bool>('qrActivator', {
-      'ssid': ssid,
-      'password': password,
-      'token': token,
-    });
-    return started ?? false;
+    try {
+      final started = await _methodChannel.invokeMethod<bool>('qrActivator', {
+        'ssid': ssid,
+        'password': password,
+        'token': token,
+      });
+      return started ?? false;
+    } catch (e) {
+      return false;
+    }
   }
 
   /// Set log level (DEBUG, INFO, WARNING, ERROR)
